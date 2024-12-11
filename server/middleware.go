@@ -25,6 +25,7 @@ import (
 func NewRequestLogger(s *Server) *RequestLogger {
 	return &RequestLogger{
 		s.Logger,
+		s.CommandRunner.GlobalCfg.Metrics.Prometheus.Endpoint,
 		s.WebAuthentication,
 		s.WebUsername,
 		s.WebPassword,
@@ -34,10 +35,11 @@ func NewRequestLogger(s *Server) *RequestLogger {
 // RequestLogger logs requests and their response codes.
 // as well as handle the basicauth on the requests
 type RequestLogger struct {
-	logger            logging.SimpleLogging
-	WebAuthentication bool
-	WebUsername       string
-	WebPassword       string
+	logger             logging.SimpleLogging
+	PrometheusEndpoint string
+	WebAuthentication  bool
+	WebUsername        string
+	WebPassword        string
 }
 
 // ServeHTTP implements the middleware function. It logs all requests at DEBUG level.
@@ -47,8 +49,8 @@ func (l *RequestLogger) ServeHTTP(rw http.ResponseWriter, r *http.Request, next 
 	if !l.WebAuthentication ||
 		r.URL.Path == "/events" ||
 		r.URL.Path == "/healthz" ||
-		r.URL.Path == "/metrics" ||
 		r.URL.Path == "/status" ||
+		r.URL.Path == l.PrometheusEndpoint ||
 		strings.HasPrefix(r.URL.Path, "/api/") {
 		allowed = true
 	} else {
