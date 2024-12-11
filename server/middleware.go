@@ -47,6 +47,7 @@ func (l *RequestLogger) ServeHTTP(rw http.ResponseWriter, r *http.Request, next 
 	if !l.WebAuthentication ||
 		r.URL.Path == "/events" ||
 		r.URL.Path == "/healthz" ||
+		r.URL.Path == "/metrics" ||
 		r.URL.Path == "/status" ||
 		strings.HasPrefix(r.URL.Path, "/api/") {
 		allowed = true
